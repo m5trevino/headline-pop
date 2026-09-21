@@ -1,0 +1,186 @@
+#!/usr/bin/env bash
+#
+# headline-pop — Launcher
+# Usage: ./run
+#
+
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PYTHON="${PYTHON:-python3}"
+
+# Colors
+reset=$(tput sgr0 2>/dev/null || echo "")
+bold=$(tput bold 2>/dev/null || echo "")
+cyan=$(tput setaf 6 2>/dev/null || echo "")
+green=$(tput setaf 2 2>/dev/null || echo "")
+yellow=$(tput setaf 3 2>/dev/null || echo "")
+dim=$(tput setaf 8 2>/dev/null || echo "")
+
+# ─── Banner ───────────────────────────────────────────────────────────────
+echo ""
+echo -e "${cyan}${bold}"
+echo "   ____        _                  ____  ____ "
+echo "  / ___|  __ _| |_ _   _  ___    | __ )| __ )"
+echo "  \\___ \\ / _\` | | | | | |/ _ \\   |  _ \\|  _ \\"
+echo "   ___) | (_| | | |_| |  __/   _| |_) | |_) |"
+echo "  |____/ \\__,_|_|\\__,_|\\___|   |____/|____/ ${reset}"
+echo ""
+echo -e "  ${dim}Text spotlight video pipeline — click a word, get a video.${reset}"
+echo ""
+
+# ─── Check environment ────────────────────────────────────────────────────
+MISSING=()
+
+if ! command -v tesseract &>/dev/null; then
+    MISSING+=("tesseract (sudo apt install tesseract-ocr)")
+fi
+if ! command -v ffmpeg &>/dev/null; then
+    MISSING+=("ffmpeg (sudo apt install ffmpeg)")
+fi
+
+# Check Python packages
+for pkg in pytesseract Pillow; do
+    if ! $PYTHON -c "import $pkg" 2>/dev/null; then
+        MISSING+=("$pkg (pip install $pkg)")
+    fi
+done
+
+if [[ ${#MISSING[@]} -gt 0 ]]; then
+    echo -e "  ${yellow}⚠  Missing dependencies:${reset}"
+    for m in "${MISSING[@]}"; do
+        echo "    • $m"
+    done
+    echo ""
+    echo -e "  ${dim}Quick fix: pip install -r requirements.txt${reset}"
+    echo ""
+fi
+
+# ─── Menu ─────────────────────────────────────────────────────────────────
+echo "  What do you want to do?"
+echo ""
+echo "  ${bold}1) Launch Dashboard${reset}          — GUI app (browse image, select text, render)"
+echo "  ${bold}2) CLI examples${reset}              — View usage commands for manual pipeline"
+echo "  ${bold}3) Install dependencies${reset}       — pip install all requirements"
+echo "  ${bold}q) Quit${reset}"
+echo ""
+echo -n "  > "
+read -r CHOICE
+
+case "$CHOICE" in
+
+# ─── 1) Launch Dashboard ─────────────────────────────────────────────────
+1)
+    echo ""
+    echo -e "  ${green}▶  Launching Dashboard...${reset}"
+    echo -e "  ${dim}  (Press Ctrl+C to exit)${reset}"
+    echo ""
+    $PYTHON "$SCRIPT_DIR/dashboard.py"
+    ;;
+
+# ─── 2) CLI Examples ──────────────────────────────────────────────────────
+2)
+    echo ""
+    echo -e "  ${cyan}${bold}══════════════════════════════════════════════════════════════════${reset}"
+    echo -e "  ${cyan}${bold}  HEADLINE-POP  ·  Quick CLI Reference${reset}"
+    echo -e "  ${cyan}${bold}══════════════════════════════════════════════════════════════════${reset}"
+    echo ""
+
+    echo -e "  ${bold}⧫  Full pipeline (one command)${reset}"
+    echo -e "  ${dim}  ─────────────────────────────────${reset}"
+    echo ""
+    echo -e "    ${green}python3 orchestrator.py \\"${reset}"
+    echo -e "        --image article.png \\"${reset}"
+    echo -e "        --ocr article.json \\"${reset}"
+    echo -e "        --click-x 150 --click-y 40 \\"${reset}"
+    echo -e "        --blur --shadow --highlight \\"${reset}"
+    echo -e "        --frames 60 --fps 30${reset}"
+    echo ""
+    echo -e "  ${dim}  Output: headline_pop.mp4${reset}"
+    echo ""
+
+    echo -e "  ${bold}⧫  Step by step (modular)${reset}"
+    echo -e "  ${dim}  ────────────────────────${reset}"
+    echo ""
+    echo -e "    ${dim}# 1. Extract text coordinates from image${reset}"
+    echo -e "    ${green}python3 ocr_extract.py article.png -o article.json${reset}"
+    echo ""
+    echo -e "    ${dim}# 2. Select text with GUI (interactive)${reset}"
+    echo -e "    ${green}python3 selection_gui.py article.png${reset}"
+    echo -e "    ${dim}# → Click on the word → prints {\"x\": 50, \"y\": 30}${reset}"
+    echo ""
+    echo -e "    ${dim}# 3. Blur the background${reset}"
+    echo -e "    ${green}python3 blur_engine.py article.png -k 15 -o blurred.png${reset}"
+    echo ""
+    echo -e "    ${dim}# 4. Extract text region as transparent PNG${reset}"
+    echo -e "    ${green}python3 headline_mask.py article.png article.json 150 40 -o text.png${reset}"
+    echo ""
+    echo -e "    ${dim}# 5. Add shadow to text${reset}"
+    echo -e "    ${green}python3 drop_shadow.py text.png -o shadowed.png${reset}"
+    echo ""
+    echo -e "    ${dim}# 6. Highlight behind text${reset}"
+    echo -e "    ${green}python3 highlight_rect.py article.png article.json 150 40 -o highlight.png${reset}"
+    echo ""
+    echo -e "    ${dim}# 7. Compose spotlight (blurred bg + sharp text)${reset}"
+    echo -e "    ${green}python3 spotlight.py blurred.png shadowed.png -o composite.png${reset}"
+    echo ""
+    echo -e "    ${dim}# 8. Generate zoom animation frames${reset}"
+    echo -e "    ${green}python3 frame_generator.py composite.png -n 60 -o frames/${reset}"
+    echo ""
+    echo -e "    ${dim}# 9. Assemble to video${reset}"
+    echo -e "    ${green}python3 video_assembler.py frames/ --fps 30 -o output.mp4${reset}"
+    echo ""
+
+    echo -e "  ${bold}⧫  Quick reference table${reset}"
+    echo -e "  ${dim}  ─────────────────────────────────${reset}"
+    echo ""
+    printf "  %-30s | %-40s | %s\n" "MODULE" "COMMAND" "OUTPUT"
+    echo -e "  ${dim}  %-30s | %-40s | %s${reset}" "──────────────────────────────────────" "───────────────────────────────────────" "──────"
+    printf "  %-30s | %-40s | %s\n" "ocr_extract.py" "python3 ocr_extract.py image.png" "image.json"
+    printf "  %-30s | %-40s | %s\n" "blur_engine.py" "python3 blur_engine.py img.png -k 15" "img_blurred.png"
+    printf "  %-30s | %-40s | %s\n" "headline_mask.py" "python3 headline_mask.py img.json 50 30" "headline_mask.png"
+    printf "  %-30s | %-40s | %s\n" "spotlight.py" "python3 spotlight.py blurred.png text.png" "spotlight_composite.png"
+    printf "  %-30s | %-40s | %s\n" "drop_shadow.py" "python3 drop_shadow.py text.png" "shadowed.png"
+    printf "  %-30s | %-40s | %s\n" "highlight_rect.py" "python3 highlight_rect.py img.json 50 30" "highlighted.png"
+    printf "  %-30s | %-40s | %s\n" "frame_generator.py" "python3 frame_generator.py img.png -n 60" "frames/0001.png..."
+    printf "  %-30s | %-40s | %s\n" "video_assembler.py" "python3 video_assembler.py frames/ --fps 30" "output.mp4"
+    printf "  %-30s | %-40s | %s\n" "orchestrator.py" "python3 orchestrator.py --image img.png --ocr i.json \\ --click-x 50 --click-y 30 \\ --blur --shadow --frames 60" "headline_pop.mp4"
+    printf "  %-30s | %-40s | %s\n" "dashboard.py" "python3 dashboard.py" "GUI app"
+    echo ""
+
+    echo -e "  ${bold}⧫  Effect flags (orchestrator.py)${reset}"
+    echo -e "  ${dim}  ────────────────────────────────${reset}"
+    echo ""
+    echo -e "    --blur         → Gaussian blur background (kernel 15)"
+    echo -e "    --shadow       → Drop shadow on text layer"
+    echo -e "    --highlight    → Yellow highlight box behind text"
+    echo -e "    --frames N     → Animation frames (default: 60)"
+    echo -e "    --fps N        → Video frame rate (default: 30)"
+    echo ""
+    ;;
+
+# ─── 3) Install ───────────────────────────────────────────────────────────
+3)
+    echo ""
+    echo -e "  ${green}▶  Installing dependencies...${reset}"
+    $PYTHON -m pip install -r "$SCRIPT_DIR/requirements.txt"
+    echo ""
+    echo -e "  ${green}✓  Done.${reset}"
+    echo ""
+    ;;
+
+# ─── Q) Quit ──────────────────────────────────────────────────────────────
+q|Q|quit|exit|"")
+    echo ""
+    echo -e "  ${dim}  Bye.${reset}"
+    echo ""
+    exit 0
+    ;;
+
+# ─── Invalid ──────────────────────────────────────────────────────────────
+*)
+    echo ""
+    echo -e "  ${yellow}  Unknown choice: $CHOICE${reset}"
+    echo ""
+    ;;
+
+esac
