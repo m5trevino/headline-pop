@@ -8,6 +8,11 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PYTHON="${PYTHON:-python3}"
 
+# uv's Python 3.12 doesn't ship Tcl/Tk — point it to the system Tcl
+# so tkinter works in the venv.  Also pick it up when we spawn child
+# processes (selection_gui, dashboard) from this script.
+export TCLLIBPATH="${TCLLIBPATH:-/usr/share/tcltk/tcl8.6:/usr/lib/x86_64-linux-gnu/tcl8.6}"
+
 # Colors
 reset=$(tput sgr0 2>/dev/null || echo "")
 bold=$(tput bold 2>/dev/null || echo "")
