@@ -151,11 +151,11 @@ class DashboardApp:
         self._render_process: subprocess.Popen | None = None
         self._is_rendering = False
 
-        # Error handler (UI-005)
-        self.error_handler = ErrorHandler(self.status_var)
-
         self._apply_theme()
         self._build_layout()
+
+        # Error handler (UI-005) — must come after _build_layout which sets status_var
+        self.error_handler = ErrorHandler(self.status_var)
 
     def _apply_theme(self):
         """Apply clean, focused dark theme."""
