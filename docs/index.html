@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Headline Spotlight — Documentation</title>
+    <style>
+        :root {
+            --bg: #0f1117;
+            --surface: #161922;
+            --border: #242836;
+            --text: #e2e4eb;
+            --text-muted: #8b8fa3;
+            --accent: #5e6ce8;
+            --accent-light: #7b88f0;
+            --green: #34d399;
+            --orange: #fb923c;
+            --red: #f87171;
+            --yellow: #fbbf24;
+            --sidebar-width: 300px;
+            --header-height: 64px;
+            --code-bg: #1a1d28;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            position: fixed;
+            top: 0; left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            z-index: 100;
+            padding: 20px 0;
+        }
+
+        .sidebar-logo {
+            padding: 0 24px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .sidebar-logo h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-logo h1 .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-logo .version {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            padding-left: 42px;
+        }
+
+        .sidebar-section {
+            padding: 4px 16px;
+        }
+
+        .sidebar-section-title {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-muted);
+            padding: 12px 8px 6px;
+        }
+
+        .sidebar-link {
+            display: block;
+            padding: 6px 8px;
+            font-size: 13.5px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+
+        .sidebar-link:hover {
+            background: rgba(94, 108, 232, 0.08);
+            color: var(--text);
+        }
+
+        .sidebar-link.active {
+            background: rgba(94, 108, 232, 0.15);
+            color: var(--accent-light);
+            font-weight: 500;
+        }
+
+        /* --- Mobile toggle --- */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 200;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: var(--text);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 900px) {
+            .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-toggle { display: block; }
+            .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+            .sidebar-overlay.show { display: block; }
+        }
+
+        /* --- Main content --- */
+        .main {
+            margin-left: var(--sidebar-width);
+            padding-top: var(--header-height);
+        }
+
+        /* --- Top bar --- */
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: var(--header-height);
+            background: rgba(15, 17, 23, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            gap: 20px;
+            z-index: 50;
+        }
+
+        .topbar-search {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 14px;
+            color: var(--text);
+            font-size: 13px;
+            width: 280px;
+            outline: none;
+        }
+
+        .topbar-search::placeholder { color: var(--text-muted); }
+
+        .topbar-links {
+            margin-left: auto;
+            display: flex;
+            gap: 20px;
+        }
+
+        .topbar-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.15s;
+        }
+
+        .topbar-links a:hover { color: var(--text); }
+
+        @media (max-width: 900px) {
+            .topbar { left: 0; padding: 0 16px 0 56px; }
+        }
+
+        /* --- Content area --- */
+        .content {
+            max-width: 880px;
+            margin: 0 auto;
+            padding: 40px 48px 120px;
+        }
+
+        @media (max-width: 1100px) {
+            .content { padding: 32px 24px 80px; }
+        }
+
+        /* --- Typography --- */
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: #fff;
+        }
+
+        h1 .gradient {
+            background: linear-gradient(135deg, var(--accent-light), #a78bfa, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: 26px;
+            font-weight: 600;
+            margin: 60px 0 20px;
+            padding-top: 20px;
+            color: #fff;
+            border-top: 1px solid var(--border);
+        }
+
+        h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 36px 0 12px;
+            color: #fff;
+        }
+
+        h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 28px 0 8px;
+            color: var(--accent-light);
+        }
+
+        p { margin-bottom: 16px; color: var(--text); }
+
+        a { color: var(--accent-light); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* --- Hero section --- */
+        .hero {
+            padding: 60px 0 40px;
+            border-top: 1px solid var(--border);
+        }
+
+        .hero p.lead {
+            font-size: 19px;
+            color: var(--text-muted);
+            max-width: 640px;
+            margin-bottom: 32px;
+            line-height: 1.7;
+        }
+
+        .hero-badges {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+        }
+
+        .hero-badges .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-muted);
+        }
+
+        .hero-badges .badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-light);
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* --- Quick start code block --- */
+        .quick-install {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin: 24px 0;
+        }
+
+        .quick-install code {
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 13px;
+            color: var(--green);
+        }
+
+        .quick-install .prompt {
+            color: var(--text-muted);
+            margin-right: 8px;
+        }
+
+        /* --- Code blocks --- */
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            overflow-x: auto;
+            margin: 16px 0 24px;
+            position: relative;
+        }
+
+        pre code {
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text);
+        }
+
+        pre .lang-label {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .inline-code {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.88em;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            padding: 2px 7px;
+            border-radius: 5px;
+            color: var(--accent-light);
+        }
+
+        /* --- Cards / grids --- */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 20px 0 32px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.2s;
+        }
+
+        .card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .card .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-bottom: 14px;
+        }
+
+        .card h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin: 0 0 8px;
+            color: #fff;
+        }
+
+        .card p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        /* --- Tables --- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0 32px;
+            font-size: 14px;
+        }
+
+        thead {
+            background: var(--surface);
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        tr:hover td {
+            background: rgba(94, 108, 232, 0.04);
+        }
+
+        /* --- Lists --- */
+        ul, ol {
+            margin: 12px 0 20px 24px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        li::marker {
+            color: var(--text-muted);
+        }
+
+        /* --- Callout boxes --- */
+        .callout {
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 20px 0;
+            font-size: 14px;
+            border-left: 3px solid;
+        }
+
+        .callout-info {
+            background: rgba(94, 108, 232, 0.08);
+            border-color: var(--accent);
+        }
+
+        .callout-warning {
+            background: rgba(251, 146, 60, 0.08);
+            border-color: var(--orange);
+        }
+
+        .callout-success {
+            background: rgba(52, 211, 153, 0.08);
+            border-color: var(--green);
+        }
+
+        .callout-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- Architecture diagram (CSS-based) --- */
+        .arch-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 24px 0 32px;
+            padding: 32px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .arch-layer {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .arch-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            width: 120px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .arch-blocks {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .arch-block {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid;
+        }
+
+        .arch-block.ui {
+            background: rgba(94, 108, 232, 0.1);
+            border-color: var(--accent);
+            color: var(--accent-light);
+        }
+
+        .arch-block.pipeline {
+            background: rgba(52, 211, 153, 0.1);
+            border-color: var(--green);
+            color: var(--green);
+        }
+
+        .arch-block.engine {
+            background: rgba(251, 146, 60, 0.1);
+            border-color: var(--orange);
+            color: var(--orange);
+        }
+
+        .arch-block.system {
+            background: rgba(139, 143, 163, 0.1);
+            border-color: var(--text-muted);
+            color: var(--text-muted);
+        }
+
+        .arch-arrow {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 18px;
+        }
+
+        /* --- Feature list with checkmarks --- */
+        .feature-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 32px;
+            margin: 20px 0 32px;
+        }
+
+        @media (max-width: 700px) {
+            .feature-list { grid-template-columns: 1fr; }
+        }
+
+        .feature-list li {
+            list-style: none;
+            margin-left: -24px;
+            padding-left: 24px;
+            position: relative;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        /* --- Section anchor --- */
+        .section-anchor {
+            scroll-margin-top: 80px;
+        }
+
+        /* --- Divider --- */
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 48px 0;
+        }
+
+        /* --- Footer --- */
+        .footer {
+            border-top: 1px solid var(--border);
+            padding: 32px 48px;
+            margin-left: var(--sidebar-width);
+            font-size: 13px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        @media (max-width: 900px) {
+            .footer { margin-left: 0; padding: 24px; flex-direction: column; gap: 8px; }
+        }
+
+        .footer a { color: var(--accent-light); }
+    </style>
+</head>
+<body>
+
+<!-- Mobile sidebar toggle -->
+<button class="sidebar-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open'); document.querySelector('.sidebar-overlay').classList.toggle('show');">☰</button>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open'); document.querySelector('.sidebar-overlay').classList.remove('show');"></div>
+
+<!-- Sidebar Navigation -->
+<nav class="sidebar">
+    <div class="sidebar-logo">
+        <h1>
+            <span class="logo-icon">🔦</span>
+            Headline Spotlight
+        </h1>
+        <div class="version">v0.1.0 · Documentation</div>
+    </div>
+
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">Getting Started</div>
+        <a class="sidebar-link" href="#introduction">Introduction</a>
+        <a class="sidebar-link" href="#installation">Installation</a>
+        <a class="sidebar-link" href="#first-render">Your First Render</a>
+        <a class="sidebar-link" href="#quick-cli">Quick CLI Reference</a>
+    </div>
+
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">User Guide</div>
+        <a class="sidebar-link" href="#dashboard">Dashboard App</a>
+        <a class="sidebar-link" href="#image-selection">Image Selection</a>
+        <a class="sidebar-link" href="#effects">Effects</a>
+        <a class="sidebar-link" href="#rendering">Rendering</a>
+        <a class="sidebar-link" href="#output">Output</a>
+        <a class="sidebar-link" href="#faq">FAQ</a>
+    </div>
+
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">Architecture</div>
+        <a class="sidebar-link" href="#architecture">System Architecture</a>
+        <a class="sidebar-link" href="#modules">Module Reference</a>
+        <a class="sidebar-link" href="#pipeline">Pipeline Flow</a>
+    </div>
+
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">CLI Tools</div>
+        <a class="sidebar-link" href="#cli-ocr">OCR Extraction</a>
+        <a class="sidebar-link" href="#cli-blur">Blur Engine</a>
+        <a class="sidebar-link" href="#cli-mask">Headline Mask</a>
+        <a class="sidebar-link" href="#cli-spotlight">Spotlight</a>
+        <a class="sidebar-link" href="#cli-shadow">Drop Shadow</a>
+        <a class="sidebar-link" href="#cli-frames">Frame Generator</a>
+        <a class="sidebar-link" href="#cli-video">Video Assembler</a>
+        <a class="sidebar-link" href="#cli-highlight">Highlight Rect</a>
+        <a class="sidebar-link" href="#cli-orchestrator">Orchestrator</a>
+    </div>
+
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">Reference</div>
+        <a class="sidebar-link" href="#data-format">Data Format</a>
+        <a class="sidebar-link" href="#dependencies">Dependencies</a>
+        <a class="sidebar-link" href="#troubleshooting">Troubleshooting</a>
+    </div>
+</nav>
+
+<!-- Top bar -->
+<div class="topbar">
+    <input type="text" class="topbar-search" placeholder="Search documentation…" />
+    <div class="topbar-links">
+        <a href="https://github.com">GitHub</a>
+        <a href="#cli-orchestrator">API</a>
+    </div>
+</div>
+
+<!-- Main content -->
+<main class="main">
+<div class="content">
+
+<!-- ============ HERO / INTRODUCTION ============ -->
+<section class="hero section-anchor" id="introduction">
+    <h1><span class="gradient">Headline Spotlight</span></h1>
+    <p class="lead">
+        Select any text within an image, apply visual effects, and generate polished animated spotlight videos. Built for journalists, social media creators, educators, and newsrooms that need to highlight headlines, quotes, or key passages from images.
+    </p>
+    <div class="hero-badges">
+        <span class="badge"><span class="dot" style="background: var(--green)"></span> Python 3.11+</span>
+        <span class="badge">Tkinter GUI</span>
+        <span class="badge">Tesseract OCR</span>
+        <span class="badge">OpenCV</span>
+        <span class="badge">FFmpeg MP4</span>
+        <span class="badge">MIT Licensed</span>
+    </div>
+    <div class="hero-cta">
+        <a href="#installation" class="btn btn-primary">Get Started →</a>
+        <a href="#modules" class="btn btn-secondary">View Modules</a>
+    </div>
+</section>
+
+<!-- ============ WHAT IS IT ============ -->
+<section class="section-anchor" id="what-is">
+    <h2>What Is Headline Spotlight?</h2>
+    <p>
+        Headline Spotlight is a <strong>modular Python toolkit and desktop application</strong> for creating spotlight-style videos from images containing text. It extracts text with precise pixel coordinates, applies visual effects like blur and shadow, and produces smooth animated MP4 videos with a zoom effect.
+    </p>
+    <p>
+        Think of it as a focused tool: you have a screenshot, article, or image with text on it. You want to draw attention to a specific word or headline. Headline Spotlight lets you click on that text, apply effects, and generate a polished video — all in one pipeline.
+    </p>
+
+    <h3>Who Is This For?</h3>
+    <div class="card-grid">
+        <div class="card">
+            <div class="card-icon" style="background: rgba(94,108,232,0.15); color: var(--accent-light);">📰</div>
+            <h4>Journalists & Newsrooms</h4>
+            <p>Highlight quotes from press releases, statements, or leaked documents for broadcast or social media.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon" style="background: rgba(52,211,153,0.15); color: var(--green);">📱</div>
+            <h4>Social Media Creators</h4>
+            <p>Create engaging video content by spotlighting text from articles, tweets, or memes with smooth animations.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon" style="background: rgba(251,146,60,0.15); color: var(--orange);">🎓</div>
+            <h4>Educators</h4>
+            <p>Draw attention to key passages, definitions, or formulas in educational materials for presentations.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon" style="background: rgba(248,113,113,0.15); color: var(--red);">🔍</div>
+            <h4>Researchers & Analysts</h4>
+            <p>Annotate and highlight specific findings in research documents for presentations and reports.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============ CORE FEATURES ============ -->
+<section class="section-anchor" id="features">
+    <h2>Core Features</h2>
+    <ul class="feature-list">
+        <li>Word-level OCR with pixel-accurate bounding boxes</li>
+        <li>Click-to-select text in a visual image viewer</li>
+        <li>Gaussian blur on background images</li>
+        <li>Transparent text extraction as PNG cutouts</li>
+        <li>Drop shadow generation on text layers</li>
+        <li>Semi-transparent highlight rectangles</li>
+        <li>Spotlight compositing (sharp text + blurred bg)</li>
+        <li>Smooth zoom animation (frame-by-frame scaling)</li>
+        <li>MP4 video encoding via FFmpeg</li>
+        <li>GUI dashboard with live preview</li>
+        <li>Background-thread rendering (non-blocking)</li>
+        <li>Comprehensive error handling (no terminal errors)</li>
+        <li>Modular architecture — use CLI or GUI</li>
+        <li>Zero-copy pipeline — originals never modified</li>
+    </ul>
+</section>
+
+<!-- ============ INSTALLATION ============ -->
+<section class="section-anchor" id="installation">
+    <h2>Installation</h2>
+
+    <h3>System Requirements</h3>
+    <ul>
+        <li><strong>Python 3.11+</strong> (tested on 3.11, 3.12)</li>
+        <li><strong>Tesseract OCR</strong> 5.x (system package)</li>
+        <li><strong>FFmpeg</strong> 5.x (system package, for video encoding)</li>
+        <li>Linux, macOS, or Windows with display (for GUI)</li>
+    </ul>
+
+    <h3>Install Tesseract (Linux)</h3>
+    <div class="quick-install">
+        <code><span class="prompt">$</span> sudo apt install tesseract-ocr ffmpeg python3-pip</code>
+    </div>
+
+    <h3>Install Tesseract (macOS)</h3>
+    <div class="quick-install">
+        <code><span class="prompt">$</span> brew install tesseract ffmpeg</code>
+    </div>
+
+    <h3>Install Python Dependencies</h3>
+    <div class="quick-install">
+        <code><span class="prompt">$</span> pip install -r requirements.txt</code>
+    </div>
+
+    <h3>Install Python Packages (Manual)</h3>
+    <div class="quick-install">
+        <code><span class="prompt">$</span> pip install pytesseract Pillow opencv-python-headless numpy</code>
+    </div>
+
+    <div class="callout callout-info">
+        <div class="callout-title">ℹ️ Headless / Server Use</div>
+        Use <span class="inline-code">opencv-python-headless</span> instead of <span class="inline-code">opencv-python</span> if running without a display. The GUI requires a display server.
+    </div>
+</section>
+
+<!-- ============ FIRST RENDER ============ -->
+<section class="section-anchor" id="first-render">
+    <h2>Your First Render</h2>
+    <p>Here's the fastest path from image to spotlight video:</p>
+
+    <h3>Option A: Dashboard GUI (Recommended)</h3>
+    <pre><span class="lang-label">shell</span><code><span class="prompt">$</span> python3 dashboard.py
+
+<span class="comment"># 1. Click "Browse..." → select your image</span>
+<span class="comment"># 2. Click window opens → click on the text you want</span>
+<span class="comment"># 3. Tick effects (Blur, Shadow, Highlight)</span>
+<span class="comment"># 4. Click "Render" → wait → get headline_pop.mp4</span></code></pre>
+
+    <h3>Option B: Command Line (Full Pipeline)</h3>
+    <pre><span class="lang-label">shell</span><code><span class="prompt">$</span> <span class="comment"># Step 1: Extract OCR data</span>
+<span class="prompt">$</span> python3 ocr_extract.py article.png -o article.json
+
+<span class="prompt">$</span> <span class="comment"># Step 2: Run the full pipeline</span>
+<span class="prompt">$</span> python3 orchestrator.py \
+    --image article.png \
+    --ocr article.json \
+    --click-x 150 --click-y 40 \
+    --blur --shadow \
+    --frames 60 --fps 30
+
+<span class="comment"># Output: headline_pop.mp4</span></code></pre>
+
+    <h3>Option C: Modular (Build Your Own)</h3>
+    <pre><span class="lang-label">shell</span><code><span class="prompt">$</span> <span class="comment"># Blur the background</span>
+<span class="prompt">$</span> python3 blur_engine.py article.png -k 20 -o blurred.png
+
+<span class="prompt">$</span> <span class="comment"># Extract text at click point</span>
+<span class="prompt">$</span> python3 headline_mask.py article.png article.json 150 40 -o text.png
+
+<span class="prompt">$</span> <span class="comment"># Composite spotlight</span>
+<span class="prompt">$</span> python3 spotlight.py blurred.png text.png -o composite.png
+
+<span class="prompt">$</span> <span class="comment"># Generate animation frames</span>
+<span class="prompt">$</span> python3 frame_generator.py composite.png -n 60 -o frames/
+
+<span class="prompt">$</span> <span class="comment"># Assemble video</span>
+<span class="prompt">$</span> python3 video_assembler.py frames/ --fps 30 -o output.mp4</code></pre>
+</section>
+
+<!-- ============ QUICK CLI REFERENCE ============ -->
+<section class="section-anchor" id="quick-cli">
+    <h2>Quick CLI Reference</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Module</th>
+                <th>Purpose</th>
+                <th>Input</th>
+                <th>Output</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="inline-code">ocr_extract.py</span></td>
+                <td>OCR text + coordinates</td>
+                <td>image.png</td>
+                <td>image.json</td>
+            </tr>
+            <tr>
+                <td><span class="inline-code">selection_gui.py</span></td>
+                <td>Click-to-select UI</td>
+                <td>image.png</td>
+                <td>stdout JSON</td>
+            </tr>
+            <tr>
+                <td><span class="inline-code">ocr_match.py</span></td>
+                <td>Match coordinate to word</td>
+                <td>image.json + coords</td>
+                <td>stdout JSON</td>
+            </tr>
+            <tr>
+                <td><span class="inline-code">blur_engine.py</span></td>
+                <td>Gaussian blur filter</td>
+                <td>image.png</td>
+                <td>blurred.png</td>
+            </tr>
+            <tr>
+                <td><span class="inline-code">headline_mask.py</span></td>
+                <td>Extract text as transparent PNG</td>
+                <td>image.png + JSON</td>
+                <td>text.png</td>
+            </tr>
+            <tr>
+                <td><span class="inline-code">spotlight.py</span></td>
+                <td>Compose blurred + text</td>
+                <td>blurred.png + text.png</td>
+                <td>composite.png</td>
+            </tr>
+            <tr>
+                <td><span class="inline-code">drop_shadow.py</span></td>
+                <td>Add shadow to text layer</td>
+                <td>text.png</td>
+                <td>shadowed.png</td>
+            </tr>
+            <tr>
+                <td><span class="inline-code">highlight_rect.py</span></td>
+                <td>Semi-transparent highlight box</td>
+                <td>image.png + JSON</td>
+                <td>highlighted.png</td>
+            </tr>
+            <tr>
+                <td><span class="inline-code">frame_generator.py</span></td>
+                <td>Zoom animation frames</td>
+                <td>composite.png</td>
+                <td>frames/*.png</td>
+            </tr>
+            <tr>
+                <td><span class="inline-code">video_assembler.py</span></td>
+                <td>Compile frames to MP4</td>
+                <td>frames/</td>
+                <td>output.mp4</td>
+            </tr>
+            <tr>
+                <td><span class="inline-code">orchestrator.py</span></td>
+                <td>Full pipeline controller</td>
+                <td>image + JSON + coords</td>
+                <td>headline_pop.mp4</td>
+            </tr>
+            <tr>
+                <td><span class="inline-code">dashboard.py</span></td>
+                <td>GUI application</td>
+                <td>interactive</td>
+                <td>headline_pop.mp4</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- ============ DASHBOARD APP ============ -->
+<section class="section-anchor" id="dashboard">
+    <h2>Dashboard Application</h2>
+    <p>
+        The dashboard (<span class="inline-code">dashboard.py</span>) is the main user-facing application. It provides a unified interface for selecting images, choosing text, applying effects, and rendering videos — all through a clean dark-themed GUI.
+    </p>
+
+    <h3>UI Layout</h3>
+    <div class="card-grid">
+        <div class="card">
+            <h4>📂 Image Selection</h4>
+            <p>Browse for an image file. Opens the selection GUI, click on the word, get coordinates.</p>
+        </div>
+        <div class="card">
+            <h4>🎯 Selection Coordinates</h4>
+            <p>Shows the captured X,Y coordinates of your text selection in real-time.</p>
+        </div>
+        <div class="card">
+            <h4>⚡ Effects</h4>
+            <p>Three checkboxes: Blur (background), Shadow (text depth), Highlight (background glow).</p>
+        </div>
+        <div class="card">
+            <h4>🎬 Render</h4>
+            <p>Launches the full pipeline in a background thread. Status bar shows progress. Alerts on completion.</p>
+        </div>
+    </div>
+
+    <h3>Error Handling</h3>
+    <p>
+        The dashboard includes a <strong>hardened error handler</strong> that captures all pipeline errors and surfaces them through the GUI. Users never see terminal output — every error is displayed in a user-friendly dialog with the technical log available for debugging.
+    </p>
+    <div class="callout callout-success">
+        <div class="callout-title">✅ Zero Terminal Errors</div>
+        All errors — OCR failures, missing files, timeout, encoding errors — are captured and displayed in the dashboard's error dialogs. The technical error log is always available for debugging.
+    </div>
+</section>
+
+<!-- ============ IMAGE SELECTION ============ -->
+<section class="section-anchor" id="image-selection">
+    <h2>Image Selection</h2>
+    <p>
+        The selection workflow connects the dashboard to the image viewer. When you click "Browse" and select an image:
+    </p>
+    <ol>
+        <li>A separate <strong>Selection GUI window</strong> opens showing your image at a readable size</li>
+        <li>Hover over the image to see live coordinates in the status bar</li>
+        <li><strong>Click once</strong> on the word or text you want to spotlight</li>
+        <li>The window <strong>closes automatically</strong> after the first click</li>
+        <li>Coordinates are returned to the Dashboard and displayed in the status area</li>
+    </ol>
+    <div class="callout callout-info">
+        <div class="callout-title">ℹ️ Coordinate Precision</div>
+        Coordinates are captured in the original image pixel space. Images that need to be scaled to fit the window have their coordinates mapped back to the original resolution.
+    </div>
+</section>
+
+<!-- ============ EFFECTS ============ -->
+<section class="section-anchor" id="effects">
+    <h2>Effects</h2>
+    <p>Three composable visual effects can be toggled independently:</p>
+
+    <h3>🌫️ Blur</h3>
+    <p>Applies a Gaussian blur filter to the entire background image. This de-emphasizes the background and draws the eye to the selected text. Uses OpenCV's <span class="inline-code">GaussianBlur</span> with a default kernel size of 15 pixels. The original image file is never modified.</p>
+
+    <h3>🌑 Shadow</h3>
+    <p>Adds a depth effect to the extracted text by creating an offset, blurred, semi-transparent black layer behind the text. Configurable offset distance, blur softness, and opacity. The shadow is positioned so it never obscures the text itself.</p>
+
+    <h3>🟨 Highlight</h3>
+    <p>Draws a semi-transparent rectangle behind the selected text, creating a highlight/backdrop effect. Default color is yellow (255,255,0) at 50% opacity. Custom RGB color and opacity are supported via CLI. The rectangle is padded around the full multi-word selection.</p>
+</section>
+
+<!-- ============ RENDERING ============ -->
+<section class="section-anchor" id="rendering">
+    <h2>Rendering</h2>
+    <p>
+        When you click "Render" in the dashboard, the pipeline runs in a <strong>background daemon thread</strong>, keeping the UI fully responsive. The status bar updates with progress, and a success/failure dialog appears when the video is done.
+    </p>
+
+    <h3>Pipeline Steps</h3>
+    <div class="arch-diagram">
+        <div class="arch-layer">
+            <span class="arch-label">Preprocess</span>
+            <div class="arch-blocks">
+                <span class="arch-block engine">OCR Extraction</span>
+                <span class="arch-block engine">Auto-generate JSON if missing</span>
+            </div>
+        </div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-layer">
+            <span class="arch-label">Effects</span>
+            <div class="arch-blocks">
+                <span class="arch-block pipeline">Background Blur</span>
+                <span class="arch-block pipeline">Text Mask Extract</span>
+                <span class="arch-block pipeline">Drop Shadow</span>
+                <span class="arch-block pipeline">Highlight Rect</span>
+            </div>
+        </div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-layer">
+            <span class="arch-label">Composite</span>
+            <div class="arch-blocks">
+                <span class="arch-block pipeline">Spotlight Layering</span>
+            </div>
+        </div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-layer">
+            <span class="arch-label">Animate</span>
+            <div class="arch-blocks">
+                <span class="arch-block pipeline">Frame Generator (60 frames, 1.0→1.6× zoom)</span>
+            </div>
+        </div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-layer">
+            <span class="arch-label">Encode</span>
+            <div class="arch-blocks">
+                <span class="arch-block system">FFmpeg → MP4 (H.264, 30fps, yuv420p)</span>
+            </div>
+        </div>
+    </div>
+
+    <h3>Timeouts</h3>
+    <table>
+        <thead>
+            <tr><th>Operation</th><th>Timeout</th><th>On Timeout</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>OCR Extraction</td><td>60s</td><td>Error dialog in GUI</td></tr>
+            <tr><td>Full Pipeline</td><td>600s (10 min)</td><td>Error dialog in GUI</td></tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- ============ OUTPUT ============ -->
+<section class="section-anchor" id="output">
+    <h2>Output</h2>
+    <p>The final output is a single MP4 video file named <span class="inline-code">headline_pop.mp4</span> in the current working directory.</p>
+
+    <h3>Video Properties</h3>
+    <table>
+        <thead>
+            <tr><th>Property</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Format</td><td>MP4 (H.264 / AAC)</td></tr>
+            <tr><td>Frame Rate</td><td>30 fps (configurable)</td></tr>
+            <tr><td>Number of Frames</td><td>60 (configurable)</td></tr>
+            <tr><td>Zoom Range</td><td>1.0× → 1.6×</td></tr>
+            <tr><td>Pixel Format</td><td>yuv420p (universal compatibility)</td></tr>
+            <tr><td>Resolution</td><td>Original image resolution</td></tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="section-anchor" id="faq">
+    <h2>FAQ</h2>
+
+    <h4>What image formats are supported?</h4>
+    <p>PNG and JPG/JPEG. PNG is recommended for images with text where you want clean edges.</p>
+
+    <h4>Can I use this without a display (headless)?</h4>
+    <p>Yes. All CLI modules work headlessly. The dashboard GUI and selection GUI require a display server. Use the CLI modules directly for server-side rendering.</p>
+
+    <h4>How large can my images be?</h4>
+    <p>The frame generator scales images proportionally. Very large images (4K+) will produce large output videos. For production use, consider resizing input images before processing.</p>
+
+    <h4>Can I customize the zoom animation?</h4>
+    <p>Yes. The frame generator supports <span class="inline-code">--start-scale</span> and <span class="inline-code">--end-scale</span> CLI arguments. The orchestrator uses defaults of 1.0× to 1.6×.</p>
+
+    <h4>Can I change the highlight color?</h4>
+    <p>Yes. Use <span class="inline-code">highlight_rect.py --color R,G,B</span> to set any RGB color. The default is yellow (255,255,0).</p>
+
+    <h4>What if OCR doesn't detect my text?</h4>
+    <p>Ensure your image has sufficient resolution and contrast. The selection GUI lets you hover over the image to see coordinates before clicking, so you can verify the text is visible. Try running <span class="inline-code">ocr_extract.py</span> directly to see the raw OCR output.</p>
+
+    <h4>Is the original image modified?</h4>
+    <p>No. All processing creates new output files. The original image is read but never written to.</p>
+</section>
+
+<hr>
+
+<!-- ============ ARCHITECTURE ============ -->
+<section class="section-anchor" id="architecture">
+    <h2>System Architecture</h2>
+    <p>
+        Headline Spotlight is built on a <strong>modular, zero-knowledge pipeline architecture</strong>. Each effect is a standalone Python script that communicates through file I/O and command-line arguments. The orchestrator coordinates the flow but has zero knowledge of how individual effects are implemented internally.
+    </p>
+
+    <h3>Three Layers</h3>
+    <div class="arch-diagram">
+        <div class="arch-layer">
+            <span class="arch-label">UI Layer</span>
+            <div class="arch-blocks">
+                <span class="arch-block ui">dashboard.py</span>
+                <span class="arch-block ui">selection_gui.py</span>
+            </div>
+        </div>
+        <div class="arch-arrow">│ subprocess / JSON</div>
+        <div class="arch-layer">
+            <span class="arch-label">Pipeline</span>
+            <div class="arch-blocks">
+                <span class="arch-block pipeline">orchestrator.py</span>
+            </div>
+        </div>
+        <div class="arch-arrow">│ subprocess</div>
+        <div class="arch-layer">
+            <span class="arch-label">Effect Engines</span>
+            <div class="arch-blocks">
+                <span class="arch-block engine">blur_engine.py</span>
+                <span class="arch-block engine">headline_mask.py</span>
+                <span class="arch-block engine">drop_shadow.py</span>
+                <span class="arch-block engine">highlight_rect.py</span>
+                <span class="arch-block engine">spotlight.py</span>
+                <span class="arch-block engine">frame_generator.py</span>
+                <span class="arch-block engine">video_assembler.py</span>
+            </div>
+        </div>
+        <div class="arch-arrow">│ system</div>
+        <div class="arch-layer">
+            <span class="arch-label">System</span>
+            <div class="arch-blocks">
+                <span class="arch-block system">Tesseract OCR</span>
+                <span class="arch-block system">OpenCV</span>
+                <span class="arch-block system">FFmpeg</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ MODULES ============ -->
+<section class="section-anchor" id="modules">
+    <h2>Module Reference</h2>
+
+    <h3 id="cli-ocr">ocr_extract.py — OCR Coordinate Extraction</h3>
+    <p>Loads an image, runs Tesseract OCR, and outputs structured JSON with every detected word and its bounding box.</p>
+    <pre><span class="lang-label">shell</span><code><span class="prompt">$</span> python3 ocr_extract.py &lt;image&gt; [-o &lt;output.json&gt;]
+
+<span class="comment"># Output: JSON array of { "text": "...", "box": [x, y, w, h] }</span></code></pre>
+    <table>
+        <thead><tr><th>Argument</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+            <tr><td><span class="inline-code">image_path</span></td><td>positional</td><td>—</td><td>Path to input image</td></tr>
+            <tr><td><span class="inline-code">--output</span>, <span class="inline-code">-o</span></td><td>string</td><td>&lt;base&gt;.json</td><td>Output JSON path</td></tr>
+        </tbody>
+    </table>
+
+    <h3 id="cli-blur">blur_engine.py — Background Image Blur</h3>
+    <p>Applies Gaussian blur to an image using OpenCV. Original file is never modified.</p>
+    <pre><span class="lang-label">shell</span><code><span class="prompt">$</span> python3 blur_engine.py &lt;image&gt> [-k &lt;kernel>] [-o &lt;output.png&gt;]</code></pre>
+    <table>
+        <thead><tr><th>Argument</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+            <tr><td><span class="inline-code">--kernel-size</span>, <span class="inline-code">-k</span></td><td>int (odd, ≥3)</td><td>15</td><td>Gaussian kernel size</td></tr>
+            <tr><td><span class="inline-code">--output</span>, <span class="inline-code">-o</span></td><td>string</td><td>&lt;base&gt;_blurred.png</td><td>Output image path</td></tr>
+        </tbody>
+    </table>
+
+    <h3 id="cli-mask">headline_mask.py — Text Region Extraction</h3>
+    <p>Extracts the bounding box region of selected text as a transparent PNG.</p>
+    <pre><span class="lang-label">shell</span><code><span class="prompt">$</span> python3 headline_mask.py &lt;image&gt; &lt;ocr.json&gt; &lt;click_x&gt; &lt;click_y&gt> [-p &lt;padding&gt;]</code></pre>
+
+    <h3 id="cli-spotlight">spotlight.py — Spotlight Compositing</h3>
+    <p>Composites a blurred background with a sharp text overlay.</p>
+    <pre><span class="lang-label">shell</span><code><span class="prompt">$</span> python3 spotlight.py &lt;blurred.png&gt; &lt;text.png&gt; [-o &lt;output.png&gt;]</code></pre>
+
+    <h3 id="cli-shadow">drop_shadow.py — Drop Shadow Generator</h3>
+    <p>Adds an offset, blurred, semi-transparent shadow behind a text PNG.</p>
+    <pre><span class="lang-label">shell</span><code><span class="prompt">$</span> python3 drop_shadow.py &lt;text.png&gt> [-ox &lt;x&gt;] [-oy &lt;y&gt;] [-b &lt;blur&gt;] [-o &lt;opacity&gt;]</code></pre>
+
+    <h3 id="cli-frames">frame_generator.py — Motion Generator</h3>
+    <p>Generates sequential frames with smooth scaling for zoom animation.</p>
+    <pre><span class="lang-label">shell</span><code><span class="prompt">$</span> python3 frame_generator.py &lt;image&gt [-n &lt;frames&gt;] [--start-scale &lt;s&gt;] [--end-scale &lt;s&gt;]</code></pre>
+
+    <h3 id="cli-video">video_assembler.py — Video Encoder</h3>
+    <p>Compiles frame sequence into MP4 using FFmpeg.</p>
+    <pre><span class="lang-label">shell</span><code><span class="prompt">$</span> python3 video_assembler.py &lt;frames_dir&gt; [--fps &lt;fps&gt;] [-o &lt;output.mp4&gt;]</code></pre>
+
+    <h3 id="cli-highlight">highlight_rect.py — Highlight Rectangle</h3>
+    <p>Draws a semi-transparent highlight rectangle behind selected text.</p>
+    <pre><span class="lang-label">shell</span><code><span class="prompt">$</span> python3 highlight_rect.py &lt;image&gt; &lt;ocr.json&gt; &lt;click_x&gt; &lt;click_y&gt> [-p &lt;padding&gt;] [-c R,G,B]</code></pre>
+
+    <h3 id="cli-orchestrator">orchestrator.py — Full Pipeline Controller</h3>
+    <p>Coordinates the entire pipeline: OCR → effects → compositing → animation → encoding.</p>
+    <pre><span class="lang-label">shell</span><code><span class="prompt">$</span> python3 orchestrator.py \
+    --image article.png \
+    --ocr article.json \
+    --click-x 150 --click-y 40 \
+    --blur --shadow --highlight \
+    --frames 60 --fps 30</code></pre>
+    <table>
+        <thead><tr><th>Argument</th><th>Required</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+            <tr><td><span class="inline-code">--image</span>, <span class="inline-code">-i</span></td><td>Yes</td><td>—</td><td>Input image path</td></tr>
+            <tr><td><span class="inline-code">--ocr</span>, <span class="inline-code">-o</span></td><td>Yes</td><td>—</td><td>OCR JSON file</td></tr>
+            <tr><td><span class="inline-code">--click-x</span></td><td>No</td><td>50</td><td>Click X coordinate</td></tr>
+            <tr><td><span class="inline-code">--click-y</span></td><td>No</td><td>30</td><td>Click Y coordinate</td></tr>
+            <tr><td><span class="inline-code">--blur</span></td><td>No</td><td>False</td><td>Enable background blur</td></tr>
+            <tr><td><span class="inline-code">--shadow</span></td><td>No</td><td>False</td><td>Enable text shadow</td></tr>
+            <tr><td><span class="inline-code">--highlight</span></td><td>No</td><td>False</td><td>Enable highlight rectangle</td></tr>
+            <tr><td><span class="inline-code">--frames</span></td><td>No</td><td>60</td><td>Number of animation frames</td></tr>
+            <tr><td><span class="inline-code">--fps</span></td><td>No</td><td>30</td><td>Video frame rate</td></tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- ============ DATA FORMAT ============ -->
+<section class="section-anchor" id="data-format">
+    <h2>Data Format</h2>
+    <p>OCR output uses a simple JSON array format:</p>
+    <pre><span class="lang-label">json</span><code>[
+  {
+    "text": "Headline",
+    "box": [10, 20, 150, 40]
+  },
+  {
+    "text": "Spotlight",
+    "box": [170, 20, 120, 40]
+  }
+]
+</code></pre>
+    <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+            <tr><td><span class="inline-code">text</span></td><td>string</td><td>The detected word text</td></tr>
+            <tr><td><span class="inline-code">box</span></td><td>array</td><td>[x, y, width, height] in pixel coordinates</td></tr>
+        </tbody>
+    </table>
+    <p>Click coordinates from the selection GUI use the same pixel coordinate space as the <span class="inline-code">box</span> values.</p>
+</section>
+
+<!-- ============ DEPENDENCIES ============ -->
+<section class="section-anchor" id="dependencies">
+    <h2>Dependencies</h2>
+
+    <h3>Python Packages</h3>
+    <table>
+        <thead><tr><th>Package</th><th>Purpose</th><th>Used By</th></tr></thead>
+        <tbody>
+            <tr><td><span class="inline-code">pytesseract</span></td><td>Python wrapper for Tesseract OCR</td><td>ocr_extract.py, dashboard.py</td></tr>
+            <tr><td><span class="inline-code">Pillow</span></td><td>Image loading, display, scaling</td><td>selection_gui.py, dashboard.py</td></tr>
+            <tr><td><span class="inline-code">opencv-python-headless</span></td><td>Image processing, blur, compositing</td><td>blur_engine.py, headline_mask.py, spotlight.py, drop_shadow.py, frame_generator.py, video_assembler.py, highlight_rect.py</td></tr>
+            <tr><td><span class="inline-code">numpy</span></td><td>Array operations for image processing</td><td>All OpenCV-dependent modules</td></tr>
+        </tbody>
+    </table>
+
+    <h3>System Packages</h3>
+    <table>
+        <thead><tr><th>Package</th><th>Purpose</th><th>Install</th></tr></thead>
+        <tbody>
+            <tr><td><span class="inline-code">tesseract-ocr</span></td><td>OCR engine</td><td><span class="inline-code">apt install tesseract-ocr</span></td></tr>
+            <tr><td><span class="inline-code">ffmpeg</span></td><td>Video encoding</td><td><span class="inline-code">apt install ffmpeg</span></td></tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- ============ TROUBLESHOOTING ============ -->
+<section class="section-anchor" id="troubleshooting">
+    <h2>Troubleshooting</h2>
+
+    <h4>"ModuleNotFoundError: No module named 'pytesseract'"</h4>
+    <div class="quick-install">
+        <code><span class="prompt">$</span> pip install pytesseract</code>
+    </div>
+
+    <h4>"ModuleNotFoundError: No module named 'cv2'"</h4>
+    <div class="quick-install">
+        <code><span class="prompt">$</span> pip install opencv-python-headless</code>
+    </div>
+
+    <h4>"tesseract: command not found"</h4>
+    <p>Tesseract is not installed or not in your PATH. Install it via your system package manager:</p>
+    <div class="quick-install">
+        <code><span class="prompt">$</span> sudo apt install tesseract-ocr</code>
+    </div>
+
+    <h4>"ffmpeg: command not found"</h4>
+    <div class="quick-install">
+        <code><span class="prompt">$</span> sudo apt install ffmpeg</code>
+    </div>
+
+    <h4>"Cannot open shared object file" (OpenCV)</h4>
+    <p>Missing system libraries for OpenCV. Try:</p>
+    <div class="quick-install">
+        <code><span class="prompt">$</span> sudo apt install libglib2.0-0 libsm6 libxrender1 libxext6 libgl1</code>
+    </div>
+
+    <h4>GUI won't open (display error)</h4>
+    <p>Running without a display server. Use CLI modules directly, or set <span class="inline-code">DISPLAY=:0</span> if running via SSH.</p>
+
+    <h4>OCR detects wrong text or misses words</h4>
+    <p>Try adjusting image resolution, ensure good contrast, or use <span class="inline-code">--show-all-hitboxes</span> with <span class="inline-code">ocr_match.py</span> to debug coordinate mapping.</p>
+
+    <h4>Video output is empty or black</h4>
+    <p>Check that frame files exist in the output directory and are valid PNGs. Run <span class="inline-code">frame_generator.py</span> separately to verify.</p>
+</section>
+
+</div>
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+    <span>Headline Spotlight — Python toolkit for text spotlight videos</span>
+    <span>Built with Tesseract OCR, OpenCV, FFmpeg</span>
+</footer>
+
+</body>
+</html>
